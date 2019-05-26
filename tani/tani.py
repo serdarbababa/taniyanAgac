@@ -42,7 +42,7 @@ def prepareImage(image):
     
 def takeSampleData(sample, nr_of_images, show =False):
   
-  batch_x, batch_y = dh.sample_pair(nr_of_images,sample)
+  batch_x, batch_y = dh.sample_pair(nr_of_images,sample) 
   #print(len(batch_x ), len(batch_x[0]), len(batch_x[0][0]), batch_x[0][0][0] )
   #print()
   #print()
