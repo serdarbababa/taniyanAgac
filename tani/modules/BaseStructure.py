@@ -76,6 +76,26 @@ class BaseStructure:
                         return poz
             return poz
         ################################################
+        def checkMatchingBranch(self, input_data):
+            poz = 0
+            for j in range(len(input_data)): # for all data
+                d = input_data[j]
+
+                nei = list(self.agac.neighbors(poz)) # get neighbours of node with id poz
+                if len(nei) == 0: # if there is no node, directly add node
+                    return -1*poz
+                else:
+                    k = -1
+                    for n in nei:
+                        if (self.agac.node[n]['value'] == d):
+                            k = n
+                            break
+                    if (k >= 0):
+                        poz = k
+                    else:
+                        return None
+            return poz
+        ################################################
         def checkBranch(self, input_data):
             poz = 0
             for j in range(len(input_data)): # for all data
