@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>38db1e80-db61-454b-a496-d0fa90c64d3a</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>tani.py</StartupFile>
+    <StartupFile>ist_07_12__2019.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,6 +23,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="data.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ist_07_12__2019.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="modules\BaseStructure.py" />

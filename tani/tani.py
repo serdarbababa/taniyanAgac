@@ -18,27 +18,17 @@ import random
 
 
 
-def prepareImage(image):
+def prepareImage(image,bands):
+  arr = np.empty([28, 28], dtype=np.int)
   for i in range(28):
     for j in range(28):
-      print(int(image[i][j]*256),end="\t")
-    print()
-  print()
-  print()
-  for i in range(28):
-    for j in range(28):
-      a=3
-      if(image[i][j]==0 ):
-        a=0
-      elif(image[i][j] <=1/2):
-        a=1
-      elif(image[i][j] <= 3/4):
-        a=2
-      if(a==0):
-        print (" ",end=" ")
-      else:
-        print(a,end=" ")
-    print()
+      a=0
+      for k in range(len(bands)):
+        if(image[i][j] >bands[k]):
+          a=k
+          break
+      arr[i,j]=a
+  return arr
     
 def takeSampleData(sample, nr_of_images, show =False):
   
@@ -72,10 +62,22 @@ def main():
   for i in range(28):
     print("\n",i,end="\t")
     for j in range(28):
-      print(int(testImage[i][j]*256),end=" ")
-  #prepareImage(testImage)
-  #img = pil.fromarray(np.uint8(testImage * 255) , 'L')
-  #img.show()
+      print(int(testImage[i][j]),end=" ")
+
+
+
+  a=prepareImage(testImage,[64,128,192])
+
+  print()
+  print()
+  for i in range(28):
+    print("\n",i,end="\t")
+    for j in range(28):
+      print(int(a[i][j]),end=" ")
+
+
+  img = pil.fromarray(np.uint8(a*50 ) , 'L')
+  img.show()
 
   v = Veri()
 
