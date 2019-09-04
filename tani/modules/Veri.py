@@ -1,16 +1,13 @@
 import numpy as np
 from pywt import wavedec
 import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
 import pandas as pd
-import seaborn as sns
 import random
 
 
 
 class Veri():
-    ################################################
+######### generate symbols #######################################
     def genData(self, param, show=False):
         a = []
         if param[0] == "normal":
@@ -31,7 +28,7 @@ class Veri():
         x = self.symbols[ random.randint(0, 15)]
         if verbose: print(x)
         return x
-    ################################################
+    ########## generate alphabet  ######################################
     def genSample(self, signalCount, verbose=False):
         if verbose: print("generate sample data")
         signals = []
@@ -46,7 +43,27 @@ class Veri():
             if verbose: print(signals[i])
         return signals
 
-    ################################################
+    def getSamplePredef(self):
+        #print("return sample data")
+        signals = [[105, 220, 23, 99, 266, 190, 37, 5],
+                   [334, 174, 134, -7, 19, 155, 93, 89],
+                   [72, 96, 102, 151, -14, 171, 127, 127],
+                   [15, 38, 283, 204, 232, 141, 121, 47],
+                   [157, -60, 54, 54, 69, -27, -14, 101],
+                   [0, 113, 74, 176, 68, 322, 135, 367],
+                   [56, 114, 126, 181, 93, 41, 118, 76],
+                   [164, 200, 351, 51, 36, 163, 298, -5],
+                   [140, 124, 99, 34, -46, -5, 240, 136],
+                   [113, 58, 130, 123, 171, 143, 109, 17],
+                   [-8, 299, 65, 62, 130, 146, -43, 23],
+                   [-96, 212, 56, 150, -55, 150, 151, 70],
+                   [-22, 148, 219, 62, 108, 136, 198, 126],
+                   [220, 84, 165, 167, 1, 227, 15, 144],
+                   [200, 135, 165, 64, 100, 224, 244, 140],
+                   [21, 183, -161, 65, 33, 257, -16, 112]]
+        return signals
+
+############## utilities ##################################
     def mergeList(self, input_data, verbose=False):
         if verbose:
             print("merge data")
@@ -67,9 +84,53 @@ class Veri():
         girdi = np.array(input_data)  # np.array([1,2,3,4,5,6,7,8])*1
         coeff = wavedec(girdi, 'haar', level=int(np.log2(len(girdi))))
         coefs = (self.mergeList(coeff))
+        for i in range(len(coefs)):
+            coefs[i]=int(coefs[i])
         return coefs
 
     ################################################
+    def rmse(self, predictions, targets):
+        return np.sqrt(((predictions - targets) ** 2).mean())
+    ################################################
+    def quantize(self, input_data, verbose=False):
+        borders = [-200, -100, -50, 0, 50, 100, 200]
+        borders = [-6000, -4000, -2000, -1000, -500, -100, -50, 0, 50, 100, 500, 1000, 2000, 4000, 6000]
+        #borders = [-100, -50, -30, -20, -10, -5, -3, 0, 3, 5, 10, 20, 30, 50, 100]
+        sig = []
+        if (verbose):
+            print(input_data)
+        for j in range(int(len(input_data))):
+            output = len(borders)
+            for k in range(len(borders)):
+                if (input_data[j] < borders[k]):
+                    output = k
+                    break
+            if verbose:
+                print(output, " ",)
+            sig.append(output)
+        if verbose:
+            print()
+        return sig
+    ################################################
+    def quantize(self, input_data, borders, verbose=False):
+        sig = []
+        if (verbose):
+            print(input_data)
+        for j in range(int(len(input_data))):
+            output = len(borders)
+            for k in range(len(borders)):
+                if (input_data[j] < borders[k]):
+                    output = k
+                    break
+            if verbose:
+                print(output, " ",)
+            sig.append(output)
+        if verbose:
+            print()
+        return sig
+
+
+############# generate signal ###################################
     def generateOperationsSymbols(self, operations_count, Test=False, verbose=False):
         ops_ids = []
         symbolSet = []
@@ -120,26 +181,6 @@ class Veri():
                     symbolSet.append(self.symbols[15])
         return ops_ids, symbolSet
 
-    ################################################
-    def quantize(self, input_data, len_of_data, verbose=False):
-        borders = [-200, -100, -50, 0, 50, 100, 200]
-        borders = [-6000, -4000, -2000, -1000, -500, -100, -50, 0, 50, 100, 500, 1000, 2000, 4000, 6000]
-        #borders = [-100, -50, -30, -20, -10, -5, -3, 0, 3, 5, 10, 20, 30, 50, 100]
-        sig = []
-        if (verbose):
-            print(input_data)
-        for j in range(int(len(input_data))):
-            output = len(borders)
-            for k in range(len(borders)):
-                if (input_data[j] < borders[k]):
-                    output = k
-                    break
-            if verbose:
-                print(output, " ",)
-            sig.append(output)
-        if verbose:
-            print()
-        return sig
 
     ################################################
     def generateInputData(self, op_count, verbose=False):
@@ -158,17 +199,29 @@ class Veri():
     def addNoise(self, data, noise_mean, noise_std):
         return data
 
-    ################################################
-    def rmse(self, predictions, targets):
-        return np.sqrt(((predictions - targets) ** 2).mean())
+    def symbolsToWavelet(self):
+        v = []
+        for i in range(len(self.symbols)):
+            v.append(self.getWaveletCoefs(self.symbols[i]))
+        self.symbols = v
 
-    ################################################
+
+########## display ######################################
     def displaySymbols(self):
         symbols_correspondence = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "-", "*", "/", "=", "?"]
         print("indice", "symbol", "pattern")
         for i in range(len(self.symbols)):
             print(i,  symbols_correspondence[i],    self.symbols[i])
 
-    ################################################
+
+    def decodeTrainOperations(self,all):
+        symbols_correspondence = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "-", "*", "/", "=", "?"]
+        for i in range( int(len(all)/5)):
+            for j in range(5):
+                print(symbols_correspondence[ self.symbols.index(all[i*5+j]) ] ,end=" ")
+            print()
+
+############ constructor ####################################
     def __init__(self):
-        self.symbols = self.genSample(16)
+        #self.symbols = self.genSample(16)
+        self.symbols = self.getSamplePredef()

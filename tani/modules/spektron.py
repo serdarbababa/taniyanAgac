@@ -1,20 +1,14 @@
-import numpy as np
-from pywt import wavedec
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
-import pandas as pd
-import seaborn as sns
-import random
 from modules.Veri import Veri
 import matplotlib.pyplot as plt
 import networkx as nx
 
 
 class BaseStructure:
-    ################################################
+
+########### add branch #####################################
     def addBranch(self, input_data):
         poz = 0
+
         for j in range(len(input_data)):  # for all data
             d = input_data[j]
 
@@ -41,8 +35,12 @@ class BaseStructure:
         return poz
 
     ################################################
-    def addBranchEntropy(self, input_data):
-        children = 4
+    def addBranchEntropy(self, input_data1):
+        if (self.spektron_tipi == "time domain"):
+            input_data = input_data1
+        if (self.spektron_tipi == "wavelet domain"):
+            input_data = self.v.getWaveletCoefs(input_data1)
+
         threshold = 4
         poz = 0
         for j in range(len(input_data)):  # for all data
@@ -50,15 +48,15 @@ class BaseStructure:
 
             nei = list(self.agac.neighbors(poz))  # get neighbours of node with id poz
             if len(nei) == 0:  # if there is no node, directly add node
-                for k in range(children):
-                    self.agac.add_node(self.counter, value=k, occurance_count=1, id=-1)
-                    self.agac.add_edge(poz, self.counter)
-                    self.counter += 1
+                #for k in range(children):
+                self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
+                self.agac.add_edge(poz, self.counter)
+                self.counter += 1
                 return poz
             else:
                 k = -1
                 for n in nei:
-                    if (self.agac.node[n]['value'] == d):
+                    if ( abs(self.agac.node[n]['value'] - d) <=10 ) :
                         k = n
                         break
                 if (k >= 0):
@@ -68,14 +66,14 @@ class BaseStructure:
                     poz = k
                     self.agac.node[k]['occurance_count'] += 1
                 else:
-                    for k in range(children):
-                        self.agac.add_node(self.counter, value=k, occurance_count=1, id=-1)
-                        self.agac.add_edge(poz, self.counter)
-                        self.counter += 1
+                    #for k in range(children):
+                    self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
+                    self.agac.add_edge(poz, self.counter)
+                    self.counter += 1
                     return poz
         return poz
 
-    ################################################
+########### search #####################################
     def checkMatchingBranch(self, input_data):
         poz = 0
         for j in range(len(input_data)):  # for all data
@@ -162,7 +160,7 @@ class BaseStructure:
                 data.append(k)
         return data
 
-    ################################################
+######### visualization #######################################
 
     def agCizdir(self, title="Tree structure", short=False):
         plt.rcParams['figure.figsize'] = [15, 10]
@@ -181,9 +179,9 @@ class BaseStructure:
         plt.rcParams['figure.figsize'] = [15, 10]
         # labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
         labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
-        # pos=nx.graphviz_layout(GG, prog='dot')
-        pos = graphviz_layout(self.agac, prog='dot')
-        # nx.spring_layout(GG)
+        #pos=nx.graphviz_layout(GG, prog='dot')
+        #pos = graphviz_layout(self.agac, prog='dot')
+        pos = nx.spring_layout(self.agac)
 
         plt.title(title + " node values")
         nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
@@ -216,8 +214,11 @@ class BaseStructure:
         return cbid
 
     ################################################
-    def __init__(self):
+    def __init__(self,spektron_tipi):
         self.agac = nx.DiGraph()
         self.agac.add_node(0, value=999999, occurance_count=1, id=-1)
         self.counter = 1
         self.v = Veri()
+        self.spektron_tipi=spektron_tipi
+
+

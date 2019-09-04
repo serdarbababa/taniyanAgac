@@ -17,6 +17,7 @@ from python_speech_features import mfcc, logfbank
 
 
 class Utilities:
+
     def browseFolder(self,root,pattern):
         print( root)
         lista = []
