@@ -1,0 +1,13 @@
+C:\serdar\code\taniyanAgac\rakamTanima\bin\Debug\rakamTanima.exe.config
+C:\serdar\code\taniyanAgac\rakamTanima\bin\Debug\rakamTanima.exe
+C:\serdar\code\taniyanAgac\rakamTanima\bin\Debug\rakamTanima.pdb
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.csprojAssemblyReference.cache
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.Properties.Resources.resources
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.csproj.GenerateResource.cache
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.csproj.CoreCompileInputs.cache
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.exe
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.pdb
+C:\serdar\code\taniyanAgac\rakamTanima\bin\Debug\NAudio.dll
+C:\serdar\code\taniyanAgac\rakamTanima\bin\Debug\NAudio.xml
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.csproj.CopyComplete
+C:\serdar\code\taniyanAgac\rakamTanima\obj\Debug\rakamTanima.Form1.resources
