@@ -102,10 +102,9 @@ if __name__ == "__main__":
   dh = MNISTDataHandler("MNIST_data", is_train=True)
   main()
 
-# TODO
-# 1. encode image forinput
-# 2. build tree from input
-# 3. display tree
-# 4. clasify
-# 5. deeper thinking
-# 6. 
+# TODO 1. encode image forinput
+# TODO 2. build tree from input
+# TODO  3. display tree
+# TODO  4. clasify
+# TODO  5. deeper thinking
+# TODO  6.
