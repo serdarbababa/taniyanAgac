@@ -41,7 +41,7 @@ class BaseStructure:
         if (self.spektron_tipi == "wavelet domain"):
             input_data = self.v.getWaveletCoefs(input_data1)
 
-        threshold = 4
+        threshold = 5
         poz = 0
         for j in range(len(input_data)):  # for all data
             d = input_data[j]
@@ -214,11 +214,14 @@ class BaseStructure:
         return cbid
 
     ################################################
-    def __init__(self,spektron_tipi):
+    def __init__(self,veriTipi, spektron_tipi):
         self.agac = nx.DiGraph()
         self.agac.add_node(0, value=999999, occurance_count=1, id=-1)
         self.counter = 1
-        self.v = Veri()
+        self.v = Veri(veriTipi)
         self.spektron_tipi=spektron_tipi
 
 
+class Context:
+    def __init__(self):
+        a=1

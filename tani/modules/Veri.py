@@ -222,6 +222,7 @@ class Veri():
             print()
 
 ############ constructor ####################################
-    def __init__(self):
+    def __init__(self,tip="input"):
         #self.symbols = self.genSample(16)
-        self.symbols = self.getSamplePredef()
+        if(tip=="input"):
+            self.symbols = self.getSamplePredef()
