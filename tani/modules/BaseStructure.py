@@ -1,218 +1,229 @@
-import numpy as np
-from pywt import wavedec
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_agraph import graphviz_layout
-import networkx as nx
-import pandas as pd
-import seaborn as sns
-import random
 from modules.Veri import Veri
 import matplotlib.pyplot as plt
 import networkx as nx
 
 
-
-
 class BaseStructure:
-        ################################################
-        def addBranch(self, input_data):
-            poz = 0
-            for j in range(len(input_data)): # for all data
-                d = input_data[j]
 
-                nei = list(self.agac.neighbors(poz)) # get neighbours of node with id poz
-                if len(nei) == 0: # if there is no node, directly add node
+########### add branch #####################################
+    def addBranch(self, input_data):
+        poz = 0
+
+        for j in range(len(input_data)):  # for all data
+            d = input_data[j]
+
+            nei = list(self.agac.neighbors(poz))  # get neighbours of node with id poz
+            if len(nei) == 0:  # if there is no node, directly add node
+                self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
+                self.agac.add_edge(poz, self.counter)
+                poz = self.counter
+                self.counter += 1
+            else:
+                k = -1
+                for n in nei:
+                    if (self.agac.node[n]['value'] == d):
+                        k = n
+                        break
+                if (k >= 0):
+                    poz = k
+                    self.agac.node[k]['occurance_count'] += 1
+                else:
                     self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
                     self.agac.add_edge(poz, self.counter)
                     poz = self.counter
                     self.counter += 1
-                else:
-                    k = -1
-                    for n in nei:
-                        if (self.agac.node[n]['value'] == d):
-                            k = n
-                            break
-                    if (k >= 0):
-                        poz = k
-                        self.agac.node[k]['occurance_count'] += 1
-                    else:
-                        self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
-                        self.agac.add_edge(poz, self.counter)
-                        poz = self.counter
-                        self.counter += 1
-            return poz
-        ################################################
-        def addBranchEntropy(self, input_data):
-            children = 4
-            threshold = 4
-            poz = 0
-            for j in range(len(input_data)): # for all data
-                d = input_data[j]
+        return poz
 
-                nei = list(self.agac.neighbors(poz)) # get neighbours of node with id poz
-                if len(nei) == 0: # if there is no node, directly add node
-                    for k in range(children):
-                        self.agac.add_node(self.counter, value=k, occurance_count=1, id=-1)
-                        self.agac.add_edge(poz, self.counter)                        
-                        self.counter += 1
+    ################################################
+    def addBranchEntropy(self, input_data1):
+        if (self.spektron_tipi == "time domain"):
+            input_data = input_data1
+        if (self.spektron_tipi == "wavelet domain"):
+            input_data = self.v.getWaveletCoefs(input_data1)
+
+        threshold = 2
+        poz = 0
+        for j in range(len(input_data)):  # for all data
+            d = input_data[j]
+
+            nei = list(self.agac.neighbors(poz))  # get neighbours of node with id poz
+            if len(nei) == 0:  # if there is no node, directly add node
+                #for k in range(children):
+                self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
+                self.agac.add_edge(poz, self.counter)
+                self.counter += 1
+                return poz
+            else:
+                k = -1
+                for n in nei:
+                    #when playing with values with a big range, use this, not good for 0-1 
+                    #if ( abs(self.agac.node[n]['value'] - d) <=10 ) :
+                    if (abs(self.agac.node[n]['value'] - d) < 0.05):
+                        k = n
+                        break
+                if (k >= 0):
+                    if (self.agac.node[k]['occurance_count'] < threshold):
+                        self.agac.node[k]['occurance_count'] += 1
+                        return k
+                    poz = k
+                    self.agac.node[k]['occurance_count'] += 1
+                else:
+                    #for k in range(children):
+                    self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
+                    self.agac.add_edge(poz, self.counter)
+                    self.counter += 1
                     return poz
-                else:
-                    k = -1
-                    for n in nei:
-                        if (self.agac.node[n]['value'] == d):
-                            k = n
-                            break
-                    if (k >= 0):
-                        if(self.agac.node[k]['occurance_count'] < threshold ):
-                            self.agac.node[k]['occurance_count'] += 1
-                            return k
-                        poz = k
-                        self.agac.node[k]['occurance_count'] += 1
-                    else:
-                        for k in range(children):
-                            self.agac.add_node(self.counter, value=k, occurance_count=1, id=-1)
-                            self.agac.add_edge(poz, self.counter)                            
-                            self.counter += 1
-                        return poz
-            return poz
-        ################################################
-        def checkMatchingBranch(self, input_data):
-            poz = 0
-            for j in range(len(input_data)): # for all data
-                d = input_data[j]
+        return poz
 
-                nei = list(self.agac.neighbors(poz)) # get neighbours of node with id poz
-                if len(nei) == 0: # if there is no node, directly add node
-                    return -1*poz
-                else:
-                    k = -1
-                    for n in nei:
-                        if (self.agac.node[n]['value'] == d):
-                            k = n
-                            break
-                    if (k >= 0):
-                        poz = k
-                    else:
-                        return None
-            return poz
-        ################################################
-        def checkBranch(self, input_data):
-            poz = 0
-            for j in range(len(input_data)): # for all data
-                d = input_data[j]
+########### search #####################################
+    def checkMatchingBranch(self, input_data):
+        poz = 0
+        for j in range(len(input_data)):  # for all data
+            d = input_data[j]
 
-                nei = list(self.agac.neighbors(poz)) # get neighbours of node with id poz
-                if len(nei) == 0: # if there is no node, directly add node
+            nei = list(self.agac.neighbors(poz))  # get neighbours of node with id poz
+            if len(nei) == 0:  # if there is no node, directly add node
+                return -1 * poz
+            else:
+                k = -1
+                for n in nei:
+                    if (self.agac.node[n]['value'] == d):
+                        k = n
+                        break
+                if (k >= 0):
+                    poz = k
+                else:
                     return None
+        return poz
+
+    ################################################
+    def checkBranch(self, input_data):
+        poz = 0
+        for j in range(len(input_data)):  # for all data
+            d = input_data[j]
+
+            nei = list(self.agac.neighbors(poz))  # get neighbours of node with id poz
+            if len(nei) == 0:  # if there is no node, directly add node
+                return None
+            else:
+                k = -1
+                for n in nei:
+                    if (self.agac.node[n]['value'] == d):
+                        k = n
+                        break
+                if (k >= 0):
+                    poz = k
                 else:
-                    k = -1
-                    for n in nei:
-                        if (self.agac.node[n]['value'] == d):
-                            k = n
-                            break
-                    if (k >= 0):
-                        poz = k
-                    else:
-                        return None
-            return poz
+                    return None
+        return poz
+
+    ################################################
+    def getBranchGivenStartNodeValue(self, startNodeValue):
+        data = []
+        nei = list(self.agac.neighbors(0))
+        # print(nei)
+        k = -1
+        for n in nei:
+            if (self.agac.node[n]['value'] == startNodeValue):
+                k = n
+                break
+        # print(k)
+        # data.append(k)
+
+        while (k >= 0):
+            nei = list(self.agac.neighbors(k))
+            if len(nei) == 0:
+                k = -1
+            else:
+                k = nei[0]
+                data.append(round(self.agac.node[k]['value'], 2))
+        return data
+
+    ################################################
+    def getBranchIDsGivenStartNodeValue(self, startNodeValue):
+        data = []
+        nei = list(self.agac.neighbors(0))
+        # print(nei)
+        k = -1
+        for n in nei:
+            if (self.agac.node[n]['value'] == startNodeValue):
+                k = n
+                break
+        # print(k)
+        # data.append(k)
+
+        while (k >= 0):
+            nei = list(self.agac.neighbors(k))
+            if len(nei) == 0:
+                k = -1
+            else:
+                k = nei[0]
+                # data.append(GG.node[k]['value'])
+                data.append(k)
+        return data
+
+######### visualization #######################################
+
+    def agCizdir(self, title="Tree structure", short=False):
+        plt.rcParams['figure.figsize'] = [15, 10]
+        # labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
+        labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
+        # pos=nx.graphviz_layout(GG, prog='dot')
+        # pos = graphviz_layout(self.agac, prog='dot')
+        # nx.spring_layout(GG)
+        pos = nx.spring_layout(self.agac)
+
+        plt.title(title + " node values")
+        nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
+        plt.show()
+
+    def plotGraph(self, title="Tree structure", short=False):
+        plt.rcParams['figure.figsize'] = [15, 10]
+        # labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
+        labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
+        #pos=nx.graphviz_layout(GG, prog='dot')
+        #pos = graphviz_layout(self.agac, prog='dot')
+        pos = nx.spring_layout(self.agac)
+
+        plt.title(title + " node values")
+        nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
+        plt.show()
+        if (short):
+            return
+        plt.title("node ids")
+        nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True)
+        plt.show()
+
+        plt.title("node frequency")
+        labels = dict((n, d['occurance_count']) for n, d in self.agac.nodes(data=True))
+        nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
+        plt.show()
+
+        plt.title("final nodes ids")
+        labels = dict((n, d['id']) for n, d in self.agac.nodes(data=True))
+        nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
+        plt.show()
+
         ################################################
-        def getBranchGivenStartNodeValue(self, startNodeValue):
-            data = []
-            nei = list(self.agac.neighbors(0))
-            # print(nei)
-            k = -1
-            for n in nei:
-                if (self.agac.node[n]['value'] == startNodeValue):
-                    k = n
-                    break
-            # print(k)
-            # data.append(k)
 
-            while (k >= 0):
-                nei = list(self.agac.neighbors(k))
-                if len(nei) == 0:
-                    k = -1
-                else:
-                    k = nei[0]
-                    data.append( round(self.agac.node[k]['value'],2))
-            return data
-        ################################################
-        def getBranchIDsGivenStartNodeValue(self, startNodeValue):
-            data = []
-            nei = list(self.agac.neighbors(0))
-            # print(nei)
-            k = -1
-            for n in nei:
-                if (self.agac.node[n]['value'] == startNodeValue):
-                    k = n
-                    break
-            # print(k)
-            # data.append(k)
+    ################################################
+    def learnSymbol(self, raw_data, verbose):
+        cbid = self.addBranch(raw_data)
 
-            while (k >= 0):
-                nei = list(self.agac.neighbors(k))
-                if len(nei) == 0:
-                    k = -1
-                else:
-                    k = nei[0]
-                    # data.append(GG.node[k]['value'])
-                    data.append(k)
-            return data
-        ################################################
+        # abid = self.getBranchId(qdata)
+        if (verbose):
+            print("Leaf id: ", cbid)
+        return cbid
 
-        def agCizdir(self,title = "Tree structure", short=False):
-            plt.rcParams['figure.figsize'] = [15, 10]
-            #labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
-            labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
-            # pos=nx.graphviz_layout(GG, prog='dot')
-            #pos = graphviz_layout(self.agac, prog='dot')
-            # nx.spring_layout(GG)
-            pos = nx.spring_layout(self.agac)
-            
+    ################################################
+    def __init__(self,veriTipi, spektron_tipi):
+        self.agac = nx.DiGraph()
+        self.agac.add_node(0, value=999999, occurance_count=1, id=-1)
+        self.counter = 1
+        self.v = Veri(veriTipi)
+        self.spektron_tipi=spektron_tipi
 
-            plt.title(title +" node values")
-            nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
-            plt.show()
 
-        def plotGraph(self,title = "Tree structure", short=False):
-            plt.rcParams['figure.figsize'] = [15, 10]
-            #labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
-            labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
-            # pos=nx.graphviz_layout(GG, prog='dot')
-            pos = graphviz_layout(self.agac, prog='dot')
-            # nx.spring_layout(GG)
-
-            plt.title(title +" node values")
-            nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
-            plt.show()
-            if (short):
-                return
-            plt.title("node ids")
-            nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True)
-            plt.show()
-
-            plt.title("node frequency")
-            labels = dict((n, d['occurance_count']) for n, d in self.agac.nodes(data=True))
-            nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
-            plt.show()
-
-            plt.title("final nodes ids")
-            labels = dict((n, d['id']) for n, d in self.agac.nodes(data=True))
-            nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
-            plt.show()
-
-            ################################################
-        ################################################
-        def learnSymbol(self, raw_data, verbose):
-            cbid = self.addBranch(raw_data)
-
-            # abid = self.getBranchId(qdata)
-            if (verbose):
-                print("Leaf id: ", cbid)
-            return cbid
-        ################################################
-        def __init__(self):
-            self.agac = nx.DiGraph()
-            self.agac.add_node(0, value=999999, occurance_count=1, id=-1)
-            self.counter = 1
-            self.v = Veri()
+class Context:
+    def __init__(self):
+        a=1

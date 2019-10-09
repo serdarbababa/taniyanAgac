@@ -85,7 +85,7 @@ class Veri():
         coeff = wavedec(girdi, 'haar', level=int(np.log2(len(girdi))))
         coefs = (self.mergeList(coeff))
         for i in range(len(coefs)):
-            coefs[i]=int(coefs[i])
+            coefs[i]=(coefs[i])
         return coefs
 
     ################################################
