@@ -1,7 +1,7 @@
 from modules.Veri import Veri
 import matplotlib.pyplot as plt
 import networkx as nx
-
+from networkx.drawing.nx_agraph import graphviz_layout
 
 class BaseStructure:
 
@@ -182,8 +182,8 @@ class BaseStructure:
         # labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
         labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
         #pos=nx.graphviz_layout(GG, prog='dot')
-        #pos = graphviz_layout(self.agac, prog='dot')
-        pos = nx.spring_layout(self.agac)
+        pos = graphviz_layout(self.agac, prog='dot')
+        #pos = nx.spring_layout(self.agac)
 
         plt.title(title + " node values")
         nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)

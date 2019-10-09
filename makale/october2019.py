@@ -6,7 +6,7 @@ This is a temporary script file.
 """
 #%reset
 import sys
-path = r"C:\serdar\ozel\kod\taniyanAgac\tani"
+path = r"/home/ubuntu/Documents/taniyanAgac/tani"
 sys.path.append(path)
 from modules.Veri import Veri
 from modules.BaseStructure import BaseStructure
@@ -66,7 +66,7 @@ def gen_signal(samples, sample_count):
 
 
 #%%
-nr_samples=30
+nr_samples=300
 
 samples = sample_gen()
 signal = gen_signal(samples, nr_samples)
@@ -116,7 +116,7 @@ wav_signal = [item for sublist in wav_signal for item in sublist]
 
 
 
-b.agCizdir()
+b.plotGraph(short=True)
 
 
 
