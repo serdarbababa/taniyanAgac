@@ -3,9 +3,12 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from networkx.drawing.nx_agraph import graphviz_layout
 
+
+
+
 class BaseStructure:
 
-########### add branch #####################################
+    ########### add branch #####################################
     def addBranch(self, input_data):
         poz = 0
 
@@ -21,7 +24,7 @@ class BaseStructure:
             else:
                 k = -1
                 for n in nei:
-                    if (self.agac.node[n]['value'] == d):
+                    if self.agac.node[n]['value'] == d:
                         k = n
                         break
                 if (k >= 0):
@@ -36,19 +39,22 @@ class BaseStructure:
 
     ################################################
     def addBranchEntropy(self, input_data1):
+        # if self.input_count >100:
+        #    for n in self.agac.nodes:
+
         if (self.spektron_tipi == "time domain"):
             input_data = input_data1
         if (self.spektron_tipi == "wavelet domain"):
             input_data = self.v.getWaveletCoefs(input_data1)
 
-        threshold = 2
+        threshold = int(self.cleaning_threshold / 3)
         poz = 0
         for j in range(len(input_data)):  # for all data
             d = input_data[j]
 
             nei = list(self.agac.neighbors(poz))  # get neighbours of node with id poz
             if len(nei) == 0:  # if there is no node, directly add node
-                #for k in range(children):
+                # for k in range(children):
                 self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
                 self.agac.add_edge(poz, self.counter)
                 self.counter += 1
@@ -56,9 +62,9 @@ class BaseStructure:
             else:
                 k = -1
                 for n in nei:
-                    #when playing with values with a big range, use this, not good for 0-1 
-                    #if ( abs(self.agac.node[n]['value'] - d) <=10 ) :
-                    if (abs(self.agac.node[n]['value'] - d) < 0.05):
+                    # when playing with values with a big range, use this, not good for 0-1
+                    # if ( abs(self.agac.node[n]['value'] - d) <=10 ) :
+                    if (abs(self.agac.node[n]['value'] - d) < self.interval):
                         k = n
                         break
                 if (k >= 0):
@@ -68,14 +74,25 @@ class BaseStructure:
                     poz = k
                     self.agac.node[k]['occurance_count'] += 1
                 else:
-                    #for k in range(children):
+                    # for k in range(children):
                     self.agac.add_node(self.counter, value=d, occurance_count=1, id=-1)
                     self.agac.add_edge(poz, self.counter)
                     self.counter += 1
                     return poz
         return poz
 
-########### search #####################################
+    ########### add branch #####################################
+    def clean_tree(self):
+        temp_list = []
+        for n in self.agac.nodes:
+            if self.agac.node[n]["occurance_count"] < self.cleaning_threshold:
+                temp_list.append(n)
+            self.agac.node[n]["occurance_count"]=0
+        for n in temp_list:
+            if n != 0:
+                self.agac.remove_node(n)
+
+    ########### search #####################################
     def checkMatchingBranch(self, input_data):
         poz = 0
         for j in range(len(input_data)):  # for all data
@@ -162,7 +179,7 @@ class BaseStructure:
                 data.append(k)
         return data
 
-######### visualization #######################################
+    ######### visualization #######################################
 
     def agCizdir(self, title="Tree structure", short=False):
         plt.rcParams['figure.figsize'] = [15, 10]
@@ -181,9 +198,9 @@ class BaseStructure:
         plt.rcParams['figure.figsize'] = [15, 10]
         # labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
         labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
-        #pos=nx.graphviz_layout(GG, prog='dot')
+        # pos=nx.graphviz_layout(GG, prog='dot')
         pos = graphviz_layout(self.agac, prog='dot')
-        #pos = nx.spring_layout(self.agac)
+        # pos = nx.spring_layout(self.agac)
 
         plt.title(title + " node values")
         nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
@@ -206,24 +223,41 @@ class BaseStructure:
 
         ################################################
 
-    ################################################
-    def learnSymbol(self, raw_data, verbose):
-        cbid = self.addBranch(raw_data)
 
+    ######### learning  #######################################
+    def tiktak(self, raw_data, verbose):
+        cbid = self.addBranch(raw_data)
+        # abid = self.getBranchId(qdata)
+        if (verbose):
+            print("Leaf id: ", cbid)
+        return cbid
+
+    def tiktakUpdate(self, raw_data, verbose=False):
+        cbid = self.addBranchEntropy(raw_data)
+        self.input_count += 1
+        if self.input_count == self.update_count_limit:
+            self.clean_tree()
         # abid = self.getBranchId(qdata)
         if (verbose):
             print("Leaf id: ", cbid)
         return cbid
 
     ################################################
-    def __init__(self,veriTipi, spektron_tipi):
+    def __init__(self, veriTipi, spektron_tipi):
         self.agac = nx.DiGraph()
         self.agac.add_node(0, value=999999, occurance_count=1, id=-1)
         self.counter = 1
         self.v = Veri(veriTipi)
-        self.spektron_tipi=spektron_tipi
+        self.spektron_tipi = spektron_tipi
+
+        # parameters
+        self.interval = 0.05
+        self.input_count = 0
+        self.cleaning_threshold = 50
+        self.update_count_limit = 1000
 
 
 class Context:
     def __init__(self):
+        a = 1
         a=1

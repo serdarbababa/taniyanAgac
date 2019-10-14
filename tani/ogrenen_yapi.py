@@ -12,7 +12,7 @@ for i in input_data:
 
 
 
-# from modules.girdi_al import Girdi
+# from modulesEski.girdi_al import Girdi
 # import matplotlib.pyplot as plt
 # g= Girdi("symbols")
 # g.sygnal_generate("symbols",["fixed",2])

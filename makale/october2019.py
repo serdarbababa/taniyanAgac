@@ -6,11 +6,12 @@ This is a temporary script file.
 """
 #%reset
 import sys
-path = r"/home/ubuntu/Documents/taniyanAgac/tani"
+path = r"/home/ubuntu/Documents/taniyanAgac"
 sys.path.append(path)
 from modules.Veri import Veri
 from modules.BaseStructure import BaseStructure
 
+b= BaseStructure("","wavelet domain")
 
 #%%
 #path = r"C:\Users\sebagis\Documents\test1-master"
@@ -66,7 +67,7 @@ def gen_signal(samples, sample_count):
 
 
 #%%
-nr_samples=300
+nr_samples=30
 
 samples = sample_gen()
 signal = gen_signal(samples, nr_samples)
@@ -82,7 +83,7 @@ plt.show()
     
 #%%
 
-b= BaseStructure("","wavelet domain")
+
 
 signal_raw = []
 for i in range(len(signal[1])):
@@ -91,6 +92,7 @@ for i in range(len(signal[1])):
          if signal[j+1][i]!=0: 
              signal_raw[-1]= (  signal[j+1][i])
              
+signal_raw = b.v.addNoise(signal_raw,0,0.4)
 
 #plt.plot(signal_raw)
 #%%
@@ -98,13 +100,17 @@ for i in range(len(signal[1])):
 
 wav_signal=[]
 
-for i in range(int(len(signal_raw)/4)):
+window_size = 4
+step = 1
+window_count = int ( (len(signal_raw)  -window_size + step) / step)
+
+for i in range(window_count):
     #temp = b.v.getWaveletCoefs(signal_raw[i*4:(i+1)*4])
     #for i in range(len(temp)):
     #    temp[i]= round(temp[i],2)
-    temp = signal_raw[i * 4:(i + 1) * 4]
-    print(temp)
-    b.addBranchEntropy(temp)
+    temp = signal_raw[i:i + window_size]
+    #print(temp)
+    b.tiktakUpdate(temp,)
     wav_signal.append(temp)
     
 wav_signal = [item for sublist in wav_signal for item in sublist]
@@ -117,6 +123,8 @@ wav_signal = [item for sublist in wav_signal for item in sublist]
 
 
 b.plotGraph(short=True)
+b.agCizdir()
+print(len(b.agac.nodes))
 
 
 

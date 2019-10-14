@@ -6,7 +6,7 @@ import random
 
 
 
-class Veri():
+class Veri:
 ######### generate symbols #######################################
     def genData(self, param, show=False):
         a = []
@@ -198,8 +198,12 @@ class Veri():
         return symbol_based
 
     ################################################
+
+
     def addNoise(self, data, noise_mean, noise_std):
-        return data
+        noise = self.genData(["normal", noise_mean, noise_std, len(data)])
+        res_list = [data[i] + noise[i] for i in range(len(data))]
+        return res_list
 
     def symbolsToWavelet(self):
         v = []
@@ -224,7 +228,7 @@ class Veri():
             print()
 
 ############ constructor ####################################
-    def __init__(self,tip="input"):
+    def __init__(self, tip="input"):
         #self.symbols = self.genSample(16)
         if(tip=="input"):
             self.symbols = self.getSamplePredef()
