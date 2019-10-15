@@ -81,13 +81,15 @@ class BaseStructure:
                     return poz
         return poz
 
+
     ########### add branch #####################################
     def clean_tree(self):
         temp_list = []
+        self.input_count = 0
         for n in self.agac.nodes:
             if self.agac.node[n]["occurance_count"] < self.cleaning_threshold:
                 temp_list.append(n)
-            self.agac.node[n]["occurance_count"]=0
+            #self.agac.node[n]["occurance_count"] = self.cleaning_threshold  # int(self.agac.node[n]["occurance_count"]/2)
         for n in temp_list:
             if n != 0:
                 self.agac.remove_node(n)
@@ -186,9 +188,9 @@ class BaseStructure:
         # labels = dict((n, round(d['value'], 2)) for n, d in self.agac.nodes(data=True))
         labels = dict((n, d['value']) for n, d in self.agac.nodes(data=True))
         # pos=nx.graphviz_layout(GG, prog='dot')
-        # pos = graphviz_layout(self.agac, prog='dot')
+        pos = graphviz_layout(self.agac, prog='dot')
         # nx.spring_layout(GG)
-        pos = nx.spring_layout(self.agac)
+        #pos = nx.spring_layout(self.agac)
 
         plt.title(title + " node values")
         nx.draw_networkx(self.agac, pos=pos, arrows=True, with_labels=True, labels=labels)
@@ -251,10 +253,10 @@ class BaseStructure:
         self.spektron_tipi = spektron_tipi
 
         # parameters
-        self.interval = 0.05
+        self.interval = 0.2
         self.input_count = 0
         self.cleaning_threshold = 50
-        self.update_count_limit = 1000
+        self.update_count_limit = 10000
 
 
 class Context:
